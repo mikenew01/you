@@ -20,21 +20,18 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: npm ci
         with:
           node-version: ${{matrix.node-version}}
           cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
 
       - name: Eslint
         run: npm run lint
 
       - name: Unit Tests
         run: npm test
-        with:
-          node-version: ${{matrix.node-version}}
-          cache: 'npm'
 
   build:
     runs-on: ubuntu-latest
