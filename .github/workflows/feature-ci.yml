@@ -8,8 +8,6 @@ on:
 env:
   ENV_REGISTRY: ghcr.io
   ENV_IMAGE_NAME: ${{ github.repository }}
-  ENV_GITHUB_ACTOR: ${{ github.actor }}
-  ENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ENV_CHECKOUT_CACHE: 'npm'
 
 jobs:
@@ -313,8 +311,8 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ env.GITHUB_ACTOR }}
-          password: ${{ env.GITHUB_SECRET }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
