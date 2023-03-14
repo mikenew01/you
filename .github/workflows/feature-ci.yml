@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'feature/**'
+
 jobs:
   packages:
     timeout-minutes: 5
@@ -151,13 +152,12 @@ jobs:
           cache: 'npm'
 
       - name: Get Package Version
-        run: echo "Package Version: $(node -p \"require('./package.json').version\")"
-        id: get_version
+        run: echo "::set-env name=VERSION::$(node -p \"require('./package.json').version\")-${{ github.run_id }}-${{ github.sha }}"
 
       - name: Change Version Package.json
         uses: reedyuk/npm-version@1.1.1
         with:
-          version: ${{ steps.get_version.outputs.stdout }}-${{ github.run_id }}-${{ github.sha }}
+          version: ${{ env.VERSION }}
 
       - name: Install Dependencies
         run: npm i
