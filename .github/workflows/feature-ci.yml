@@ -180,6 +180,7 @@ jobs:
       - name: Get Package Version
         run: |
           export VERSION=$(node -p "require('./package.json').version")-${{github.run_id}}.${{ github.sha }}
+          npm --no-git-tag-version version $VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Bump Version
