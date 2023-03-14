@@ -152,7 +152,9 @@ jobs:
           cache: 'npm'
 
       - name: Get Package Version
-        run: echo "::set-env name=VERSION::$(node -p \"require('./package.json').version\")-${{ github.run_id }}-${{ github.sha }}"
+        run: |
+          export VERSION=$(node -p "require('./package.json').version")-${{github.run_id}}-${{ github.sha }}
+          echo "::set-env name=VERSION::$VERSION"
 
       - name: Change Version Package.json
         uses: reedyuk/npm-version@1.1.1
