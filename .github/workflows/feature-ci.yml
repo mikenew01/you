@@ -197,7 +197,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Log In to GitHub Packages
-        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc && npm config set registry https://npm.pkg.github.com/
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc && npm config set @octocat:registry https://npm.pkg.github.com/
 
       - name: Publish Package
         run: npm publish
