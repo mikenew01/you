@@ -5,7 +5,6 @@ on:
     branches:
       - 'feature/**'
 
-
 jobs:
   packages:
     timeout-minutes: 5
@@ -59,8 +58,14 @@ jobs:
           node-version: ${{matrix.node-version}}
           cache: 'npm'
 
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
       - name: Restore Cached Dependencies
         uses: actions/cache@v3
+        id: npm-cache
         env:
           cache-name: cache-node-modules
         with:
