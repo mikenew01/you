@@ -183,7 +183,7 @@ jobs:
           version: ${{ env.VERSION }}
 
       - name: Install Dependencies
-        run: npm i
+        run: npm ci
 
       - name: Build Artifact
         run: npm run build
