@@ -172,6 +172,11 @@ jobs:
           node-version: ${{matrix.node-version}}
           cache: 'npm'
 
+      - name: Set Git Identity
+        run: |
+          git config --global user.email "github-pipeline-bot@galp.com"
+          git config --global user.name "Github Pipeline Bot"
+
       - name: Get Package Version
         run: |
           export VERSION=$(node -p "require('./package.json').version")-${{github.run_id}}.${{ github.sha }}
