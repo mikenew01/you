@@ -298,7 +298,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t "${{ github.repository }}:${{ env.VERSION }}" .
+          docker build -t "$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]' ):${{ env.VERSION }}" .
 
       - name: Push Docker Image to GitHub Packages
         run: |
