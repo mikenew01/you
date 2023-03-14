@@ -310,7 +310,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: image
-          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:sha-${{ github.sha }}
+          image-ref: ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/${{ github.event.repository.name }}:sha-${{ github.sha }}
           format: 'sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
