@@ -27,11 +27,11 @@ jobs:
 #        with:
 #          repo-path: './'
 #
-#      - name: Check Dependencies
-#        uses: dependency-check/action@v2.0.2
-#        with:
-#          format: 'ALL'
-#          data-directory: './dependency-check/data'
+      - name: Check Dependencies
+        uses: dependency-check/action@v2.0.2
+        with:
+          format: 'ALL'
+          data-directory: './dependency-check/data'
 
       - name: Unit Tests
         run: npm test
