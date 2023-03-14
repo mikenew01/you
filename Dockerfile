@@ -1,7 +1,13 @@
 FROM node:18-alpine As production
+
 WORKDIR /app
+
 COPY . .
-RUN npm ci
+
+RUN npm install
+
 RUN npm build
+
 EXPOSE 3000
-CMD [ "node", "dist/main.js" ]
+
+CMD [ "npm", "start:prod" ]
