@@ -216,7 +216,7 @@ jobs:
           run: npm ci
 
         - name: Lint
-          run: npm run test:e2e
+          run: npm run test:cov
 
   build:
     timeout-minutes: 5
