@@ -33,7 +33,6 @@ jobs:
   audit-packages:
     timeout-minutes: 5
     runs-on: ubuntu-latest
-    needs: [packages]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
