@@ -35,12 +35,6 @@ jobs:
         node-version: [14.x, 16.x, 18.x]
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
-        with:
-          node-version: ${{matrix.node-version}}
-          cache: 'npm'
-
       - name: Restore Cached Dependencies
         uses: actions/cache@v2
         with:
@@ -48,6 +42,15 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          node-version: ${{matrix.node-version}}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm i
 
       - name: Eslint
         run: npm run lint
