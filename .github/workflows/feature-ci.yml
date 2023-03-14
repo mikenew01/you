@@ -13,11 +13,10 @@ env:
   ENV_NODE_VERSION: 18.x
   ENV_RUNS_ON: ubuntu-latest
   ENV_CHECKOUT_CACHE: 'npm'
-  ENV_TIMEOUT_MINUTES_JOB: 5
 
 jobs:
   packages:
-    timeout-minutes: ${{ env.ENV_TIMEOUT_MINUTES_JOB }}
+    timeout-minutes: 5
     runs-on: ${{ env.ENV_RUNS_ON }}
 
     strategy:
