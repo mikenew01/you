@@ -200,5 +200,5 @@ jobs:
         run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc && npm config set registry https://npm.pkg.github.com/
 
       - name: Publish Package
-        run: npm publish --access public
+        run: npm publish
 
