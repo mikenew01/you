@@ -1,8 +1,8 @@
 {
-  "name": "you",
+  "name": "@maikoncanuto/you",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "API de devops",
+  "author": "Maikon Canuto",
   "private": false,
   "license": "UNLICENSED",
   "scripts": {
