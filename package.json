@@ -68,5 +68,9 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "url": "https://github.com/Maikoncanuto/you.git",
+    "type": "git"
   }
 }
