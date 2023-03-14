@@ -44,7 +44,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 18.x ]
 
     steps:
       - name: Checkout Code
@@ -65,7 +65,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 18.x ]
 
     steps:
       - name: Checkout Code
@@ -105,7 +105,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 18.x ]
 
     steps:
       - name: Checkout Code
@@ -145,7 +145,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 18.x ]
 
     steps:
       - name: Checkout Code
@@ -185,7 +185,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 14.x, 16.x, 18.x ]
+        node-version: [ 18.x ]
 
     steps:
       - name: Checkout Code
@@ -278,7 +278,7 @@ jobs:
         with:
           node-version: ${{matrix.node-version}}
           registry-url: 'https://npm.pkg.github.com'
-          scope: '@maikoncanuto'
+          scope: ${{ github.repository_owner }}
       - run: npm ci
       - run: npm publish
         env:
@@ -307,5 +307,5 @@ jobs:
 
       - name: Push Docker Image to GitHub Packages
         run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.actor }} --password-stdin docker.pkg.github.com
-          docker push "docker.pkg.github.com/${{ github.repository }}:${{ env.VERSION }}"
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.actor | tr '[:upper:]' '[:lower:]' }} --password-stdin docker.pkg.github.com
+          docker push "docker.pkg.github.com/${{ github.repository | tr '[:upper:]' '[:lower:]' }}:${{ env.VERSION }}"
