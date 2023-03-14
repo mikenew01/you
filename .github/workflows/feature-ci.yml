@@ -1,6 +1,9 @@
 name: feature-ci
 
 on:
+  pull_request:
+    branches:
+      - 'main'
   push:
     branches:
       - 'feature/**'
@@ -9,9 +12,20 @@ env:
   ENV_CHECKOUT_CACHE: 'npm'
 
 jobs:
+  setup-node-cache:
+    runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+    steps:
+      - name: Get cache key
+        id: cache-key
+        run: |
+          echo "::set-output name=key::${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}"
+
   packages:
     timeout-minutes: 1
     runs-on: ubuntu-latest
+    needs: setup-node-cache
 
     strategy:
       matrix:
@@ -21,19 +35,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Cache node modules
-        id: cache-npm
+      - name: Cache and Install dependencies
         uses: actions/cache@v3
         env:
           cache-name: cache-node-modules
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ needs.setup-node-cache.outputs.cache-key }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
+        run: npm ci
 
   audit-packages:
     timeout-minutes: 5
@@ -310,7 +321,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: image
-          image-ref: ghcr.io/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]'):sha-${{ github.sha }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:sha-${{ github.sha }}
           format: 'sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
