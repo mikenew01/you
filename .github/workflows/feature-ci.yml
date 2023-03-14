@@ -9,9 +9,17 @@ jobs:
   packages:
     timeout-minutes: 5
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 18.x ]
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          node-version: ${{matrix.node-version}}
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -33,9 +41,17 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     continue-on-error: true
+
+    strategy:
+      matrix:
+        node-version: [ 18.x ]
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          node-version: ${{matrix.node-version}}
+          cache: 'npm'
 
       - name: Audit Packages
         run: npm audit --audit-level moderate
@@ -126,6 +142,11 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     needs: [test]
+
+    strategy:
+      matrix:
+        node-version: [ 18.x ]
+
     steps:
       - name: Get npm cache directory
         id: npm-cache-dir
@@ -153,7 +174,7 @@ jobs:
 
       - name: Get Package Version
         run: |
-          export VERSION=$(node -p "require('./package.json').version")-${{github.run_id}}-${{ github.sha }}
+          export VERSION=$(node -p "require('./package.json').version")-${{github.run_id}}.${{ github.sha }}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Change Version Package.json
@@ -172,7 +193,7 @@ jobs:
       - name: Publish for Github Packages
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: ${{matrix.node-version}}
           registry-url: 'https://npm.pkg.github.com'
           scope: '@octocat'
       - run: npm ci
