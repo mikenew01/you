@@ -335,10 +335,13 @@ jobs:
           node-version: ${{matrix.node-version}}
           cache: 'npm'
 
+      - name: Get Name Branch
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF} | sed 's/refs\/heads\///')" >> $GITHUB_ENV
+
       - name: Scan vulnerability
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/${{ github.repository }}:${{ GITHUB_REF#refs/heads/ }}
+          image-ref: ghcr.io/${{ github.repository }}:${{ env.BRANCH_NAME }}
           format: 'sarif'
           exit-code: '1'
           ignore-unfixed: true
