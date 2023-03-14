@@ -172,21 +172,15 @@ jobs:
           node-version: ${{matrix.node-version}}
           cache: 'npm'
 
-      - name: Set Git Identity
-        run: |
-          git config --global user.email "github-pipeline-bot@galp.com"
-          git config --global user.name "Github Pipeline Bot"
-
       - name: Get Package Version
         run: |
           export VERSION=$(node -p "require('./package.json').version")-${{github.run_id}}.${{ github.sha }}
-          npm --no-git-tag-version version $VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Bump Version
-        run: |
-          npm version ${{ env.VERSION }}
-          sed -i "s/\"version\": \".*\"/\"version\": \"$(node -p \"require('./package.json').version\")\"/" package.json
+      - name: Change Version Package.json
+        uses: reedyuk/npm-version@1.1.1
+        with:
+          version: ${{ env.VERSION }}
 
       - name: Install Dependencies
         run: npm i
