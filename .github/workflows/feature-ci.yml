@@ -52,9 +52,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          node-version: ${{matrix.node-version}}
-          cache: 'npm'
 
       - name: Audit Packages
         run: npm audit --audit-level moderate
@@ -73,9 +70,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          node-version: ${{matrix.node-version}}
-          cache: 'npm'
 
       - name: Get npm cache directory
         id: npm-cache-dir
@@ -111,9 +105,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          node-version: ${{matrix.node-version}}
-          cache: 'npm'
 
       - name: Get npm cache directory
         id: npm-cache-dir
@@ -149,9 +140,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          node-version: ${{matrix.node-version}}
-          cache: 'npm'
 
       - name: Get npm cache directory
         id: npm-cache-dir
@@ -187,9 +175,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          node-version: ${{matrix.node-version}}
-          cache: 'npm'
 
       - name: Get npm cache directory
         id: npm-cache-dir
@@ -245,9 +230,6 @@ jobs:
 
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          node-version: ${{matrix.node-version}}
-          cache: 'npm'
 
       - name: Get Package Version
         run: |
@@ -290,9 +272,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          node-version: ${{matrix.node-version}}
-          cache: 'npm'
 
       - name: Get Package Version
         run: |
@@ -319,6 +298,8 @@ jobs:
         with:
           context: .
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -329,19 +310,13 @@ jobs:
     needs: [ build-and-push-image ]
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Code from Github
         uses: actions/checkout@v3
-        with:
-          node-version: ${{matrix.node-version}}
-          cache: 'npm'
 
-      - name: Get Name Branch
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF} | sed 's/refs\/heads\///')" >> $GITHUB_ENV
-
-      - name: Scan vulnerability
+      - name: Scan vulnerability from Github Packages
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/${{ github.repository }}:${{ env.BRANCH_NAME }}
+          image-ref: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
           format: 'sarif'
           exit-code: '1'
           ignore-unfixed: true
@@ -349,7 +324,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
           output: 'trivy-results.sarif'
 
-      - name: Upload Trivy scan results to GitHub Security tab
+      - name: Upload scan results to GitHub Security
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results.sarif'
