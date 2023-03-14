@@ -11,13 +11,12 @@ env:
   ENV_GITHUB_ACTOR: ${{ github.actor }}
   ENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ENV_NODE_VERSION: 18.x
-  ENV_RUNS_ON: ubuntu-latest
   ENV_CHECKOUT_CACHE: 'npm'
 
 jobs:
   packages:
     timeout-minutes: 5
-    runs-on: ${{ env.ENV_RUNS_ON }}
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
