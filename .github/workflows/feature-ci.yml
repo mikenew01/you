@@ -9,7 +9,8 @@ on:
       - 'feature/*'
 
 jobs:
-  build:
+
+  analyze-code:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -35,7 +36,10 @@ jobs:
       - name: Unit Tests
         run: npm test
 
+  build:
+    runs-on: ubuntu-latest
+    steps:
       - name: Build Artifact
-        run: npm run build:prod
+        run: npm run build
         env:
           NODE_ENV: 'production'
