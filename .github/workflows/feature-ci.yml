@@ -1,0 +1,41 @@
+name: feature-ci
+
+on:
+  push:
+    branches:
+      - 'feature/*'
+  pull_request:
+    branches:
+      - 'feature/*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Eslint
+        run: npm run lint
+
+      - name: Gitleaks
+        uses: zricethezav/gitleaks-action@v7
+        with:
+          repo-path: './'
+
+      - name: Check Dependencies
+        uses: dependency-check/action@v2.0.2
+        with:
+          format: 'ALL'
+          data-directory: './dependency-check/data'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Unit Tests
+        run: npm test
+
+      - name: Build Artifact
+        run: npm run build:prod
+        env:
+          NODE_ENV: 'production'
