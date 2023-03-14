@@ -10,7 +10,6 @@ env:
   ENV_IMAGE_NAME: ${{ github.repository }}
   ENV_GITHUB_ACTOR: ${{ github.actor }}
   ENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  ENV_NODE_VERSION: 18.x
   ENV_CHECKOUT_CACHE: 'npm'
 
 jobs:
@@ -20,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ${{ env.ENV_NODE_VERSION }}
+        node-version: [ 18.x ]
 
     steps:
       - name: Checkout Code
