@@ -41,7 +41,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [18.x]
 
     steps:
       - name: Restore Cached Dependencies
@@ -136,12 +136,13 @@ jobs:
         env:
           NODE_ENV: 'production'
 
-      - name: Publish Artifact
+      - name: Publish for Github Packages
         uses: actions/setup-node@v3
         with:
-          node-version: ${{matrix.node-version}}
+          node-version: '18.x'
+          registry-url: 'https://npm.pkg.github.com'
           scope: '@octocat'
-          registry-url: https://npm.pkg.github.com/
+      - run: npm ci
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
