@@ -190,11 +190,17 @@ jobs:
         env:
           NODE_ENV: 'production'
 
-      - name: Publish for Github Packages
+      - name: Set Up Nodejs for Github Packages
         uses: actions/setup-node@v3
         with:
           node-version: ${{matrix.node-version}}
           registry-url: 'https://npm.pkg.github.com'
-          scope: '@octocat'
-      - run: npm ci
-      - run: npm publish
+
+      - name: Log In to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm login --registry=https://npm.pkg.github.com --always-auth --auth-type=oauth
+
+      - name: Publish Package
+        run: npm publish --access public
+
