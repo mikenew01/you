@@ -307,5 +307,5 @@ jobs:
 
       - name: Push Docker Image to GitHub Packages
         run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.actor | tr '[:upper:]' '[:lower:]' }} --password-stdin docker.pkg.github.com
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login -u "${{ github.actor | tr '[:upper:]' '[:lower:]' }}" --password-stdin docker.pkg.github.com
           docker push "docker.pkg.github.com/${{ github.repository | tr '[:upper:]' '[:lower:]' }}:${{ env.VERSION }}"
