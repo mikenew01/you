@@ -151,7 +151,7 @@ jobs:
           cache: 'npm'
 
       - name: Get Package Version
-        run: echo "$(node -p \"require('./package.json').version\")"
+        run: echo "Package Version: $(node -p \"require('./package.json').version\")"
         id: get_version
 
       - name: Change Version Package.json
