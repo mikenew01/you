@@ -311,9 +311,9 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t "$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]' ):${{ env.VERSION }}" .
+          docker build -t ghcr.io/"$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]' ):${{ env.VERSION }}" .
 
       - name: Publish Docker image to Github Packages
         run: |
-          docker push "$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]' ):${{ env.VERSION }}"
+          docker push ghcr.io/"$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]' ):${{ env.VERSION }}"
 
