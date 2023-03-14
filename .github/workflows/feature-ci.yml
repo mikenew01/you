@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'feature/**'
-
 jobs:
   packages:
     timeout-minutes: 5
@@ -122,135 +121,57 @@ jobs:
       - name: Lint
         run: npm run test
 
-#jobs:
-#  dependencies:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout Code
-#        uses: actions/checkout@v3
-#
-#      - name: Install Dependencies
-#        run: npm ci
-#
-#      - name: Cache Dependencies
-#        id: cache-mern
-#        uses: actions/cache@v3
-#        with:
-#          path:
-#
-#      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-#        name: List the state of node modules
-#        continue-on-error: true
-#        run: npm list
-#
-#  eslint:
-#    runs-on: ubuntu-latest
-#    needs: [install-dependencies]
-#
-#    strategy:
-#      matrix:
-#        node-version: [18.x]
-#
-#    steps:
-#      - name: Restore Cached Dependencies
-#        uses: actions/cache@v3
-#        env:
-#          cache-name: cache-node-modules
-#        with:
-#          path: ~/.npm
-#          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-#          restore-keys: |
-#            ${{ runner.os }}-build-${{ env.cache-name }}-
-#            ${{ runner.os }}-build-
-#            ${{ runner.os }}-
-#
-#      - name: Checkout Code
-#        uses: actions/checkout@v3
-#        with:
-#          node-version: ${{matrix.node-version}}
-#          cache: 'npm'
-#
-#      - name: Install Dependencies
-#        run: npm i
-#
-#      - name: Eslint
-#        run: npm run lint
-#
-#  unit-test:
-#    runs-on: ubuntu-latest
-#    needs: [eslint]
-#
-#    strategy:
-#      matrix:
-#        node-version: [18.x]
-#
-#    steps:
-#      - name: Restore Cached Dependencies
-#        uses: actions/cache@v3
-#        env:
-#          cache-name: cache-node-modules
-#        with:
-#          path: ~/.npm
-#          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-#          restore-keys: |
-#            ${{ runner.os }}-build-${{ env.cache-name }}-
-#            ${{ runner.os }}-build-
-#            ${{ runner.os }}-
-#
-#      - name: Checkout Code
-#        uses: actions/checkout@v3
-#        with:
-#          node-version: ${{matrix.node-version}}
-#          cache: 'npm'
-#
-#      - name: Install Dependencies
-#        run: npm i
-#
-#      - name: Unit Tests
-#        run: npm test
-#
-#  build:
-#    runs-on: ubuntu-latest
-#    needs: [unit-test, eslint, install-dependencies]
-#    permissions:
-#      contents: read
-#      packages: write
-#    steps:
-#      - name: Restore Cached Dependencies
-#        uses: actions/cache@v3
-#        env:
-#          cache-name: cache-node-modules
-#        with:
-#          path: ~/.npm
-#          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-#          restore-keys: |
-#            ${{ runner.os }}-build-${{ env.cache-name }}-
-#            ${{ runner.os }}-build-
-#            ${{ runner.os }}-
-#
-#      - name: Checkout Code
-#        uses: actions/checkout@v3
-#        with:
-#          version: ${{ github.sha }}
-#          git-tag-version: 'true'
-#          node-version: ${{matrix.node-version}}
-#          cache: 'npm'
-#
-#      - name: Install Dependencies
-#        run: npm i
-#
-#      - name: Build Artifact
-#        run: npm run build
-#        env:
-#          NODE_ENV: 'production'
-#
-#      - name: Publish for Github Packages
-#        uses: actions/setup-node@v3
-#        with:
-#          node-version: '18.x'
-#          registry-url: 'https://npm.pkg.github.com'
-#          scope: '@octocat'
-#      - run: npm ci
-#      - run: npm publish
-#        env:
-#          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Restore Cached Dependencies
+        uses: actions/cache@v3
+        id: npm-cache
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          node-version: ${{matrix.node-version}}
+          cache: 'npm'
+
+      - name: Get Package Version
+        run: echo "$(node -p \"require('./package.json').version\")"
+        id: get_version
+
+      - name: Change Version Package.json
+        uses: reedyuk/npm-version@1.1.1
+        with:
+          version: ${{ steps.get_version.outputs.stdout }}-${{ github.run_id }}-${{ github.sha }}
+
+      - name: Install Dependencies
+        run: npm i
+
+      - name: Build Artifact
+        run: npm run build
+        env:
+          NODE_ENV: 'production'
+
+      - name: Publish for Github Packages
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@octocat'
+      - run: npm ci
+      - run: npm publish
