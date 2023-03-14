@@ -74,7 +74,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [18.x]
 
     steps:
       - name: Restore Cached Dependencies
@@ -123,6 +123,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
+          version: ${{ github.sha }}
+          git-tag-version: 'true'
           node-version: ${{matrix.node-version}}
           cache: 'npm'
 
@@ -137,7 +139,7 @@ jobs:
       - name: Publish Artifact
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: ${{matrix.node-version}}
           scope: '@octocat'
           registry-url: https://npm.pkg.github.com/
       - run: npm publish
