@@ -217,7 +217,7 @@ jobs:
   build-and-push-package:
     timeout-minutes: 1
     runs-on: ubuntu-latest
-    needs: [ codeql ]
+    needs: [ unit-test, e2e, coverage ]
 
     permissions:
       contents: read
