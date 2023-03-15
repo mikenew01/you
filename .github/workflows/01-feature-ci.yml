@@ -237,6 +237,11 @@ jobs:
         with:
           node-version: ${{ env.ENV_NODE_VERSION }}
 
+      - name: Config git user
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
       - name: Restore Cached Dependencies
         uses: actions/cache@v3
         id: npm-cache
@@ -258,16 +263,9 @@ jobs:
 
       - name: Push changes of Package.json
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
           git add package.json package-lock.json
           git commit -m "Bump package version ${{ env.VERSION }}"
           git push
-
-#      - name: Change Version Package.json
-#        uses: reedyuk/npm-version@1.1.1
-#        with:
-#          version: ${{ env.VERSION }}
 
       - name: Install Dependencies
         run: npm ci
