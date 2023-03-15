@@ -7,15 +7,14 @@ on:
 
 env:
   ENV_CHECKOUT_CACHE: 'npm'
+  ENV_NODE_VERSION: '18.x'
+  ENV_REGISTRY_URL: 'https://npm.pkg.github.com'
+  ENV_NODE_ENV: 'production'
 
 jobs:
   packages:
     timeout-minutes: 1
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [ 18.x ]
 
     steps:
       - name: Checkout Code
@@ -40,10 +39,6 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
 
-    strategy:
-      matrix:
-        node-version: [ 18.x ]
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -57,10 +52,6 @@ jobs:
     timeout-minutes: 1
     runs-on: ubuntu-latest
     needs: [ packages, audit-packages ]
-
-    strategy:
-      matrix:
-        node-version: [ 18.x ]
 
     steps:
       - name: Checkout Code
@@ -93,10 +84,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ packages, audit-packages ]
 
-    strategy:
-      matrix:
-        node-version: [ 18.x ]
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -128,10 +115,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ packages, audit-packages ]
 
-    strategy:
-      matrix:
-        node-version: [ 18.x ]
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -162,10 +145,6 @@ jobs:
     timeout-minutes: 1
     runs-on: ubuntu-latest
     needs: [ packages, audit-packages ]
-
-    strategy:
-      matrix:
-        node-version: [ 18.x ]
 
     steps:
       - name: Checkout Code
@@ -201,10 +180,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-
-    strategy:
-      matrix:
-        node-version: [ 18.x ]
 
     steps:
       - name: Get npm cache directory
@@ -242,13 +217,13 @@ jobs:
       - name: Build Artifact
         run: npm run build
         env:
-          NODE_ENV: 'production'
+          NODE_ENV: ${{ env.ENV_NODE_ENV }}
 
       - name: Publish Artifact to Github Packages
         uses: actions/setup-node@v3
         with:
-          node-version: ${{matrix.node-version}}
-          registry-url: 'https://npm.pkg.github.com'
+          node-version: ${{ env.ENV_NODE_VERSION }}
+          registry-url: ${{ env.ENV_REGISTRY_URL }}
           scope: ${{ github.repository_owner }}
       - run: npm ci
       - run: npm publish
@@ -302,7 +277,6 @@ jobs:
       packages: write
 
     steps:
-
       - name: Scan vulnerability from Github Packages
         uses: aquasecurity/trivy-action@master
         with:
