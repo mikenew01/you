@@ -173,12 +173,12 @@ jobs:
         run: npm run test:cov
 
   codeql:
-    timeout-minutes: 10
+    timeout-minutes: 5
     needs: [unit-test, e2e, coverage, lint]
     runs-on: ubuntu-latest
 
     permissions:
-      security-events: write
+      security-events: read
       actions: read
       contents: read
 
