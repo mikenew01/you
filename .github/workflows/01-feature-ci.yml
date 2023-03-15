@@ -5,6 +5,10 @@ on:
     branches:
       - 'feature/**'
 
+  pull_request:
+    branches:
+      - 'feature/**'
+
 env:
   ENV_CHECKOUT_CACHE: 'npm'
   ENV_NODE_VERSION: '18.x'
