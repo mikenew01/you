@@ -1,9 +1,9 @@
 {
-  "name": "you",
+  "name": "@maikoncanuto/you",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
+  "description": "API de devops",
+  "author": "Maikon Canuto",
+  "private": false,
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
@@ -27,7 +27,7 @@
     "rxjs": "^7.2.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "^9.0.0",
+    "@nestjs/cli": "^7.5.1",
     "@nestjs/schematics": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
     "@types/express": "^4.17.13",
@@ -65,5 +65,12 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "url": "https://github.com/Maikoncanuto/you.git",
+    "type": "git"
   }
 }
