@@ -229,6 +229,7 @@ jobs:
       packages: write
 
     steps:
+
       - name: Checkout Code
         uses: actions/checkout@v3
 
@@ -242,11 +243,11 @@ jobs:
         with:
           node-version: ${{ env.ENV_NODE_VERSION }}
 
-      - name: Obter nome da branch
+      - name: Get number PR
         run: |
-          BRANCH_NAME=${GITHUB_REF#refs/heads/}
-          echo "Nome da branch: $BRANCH_NAME"
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN{FS="/"} {print $3}')
+          echo "Número do PR: $PR_NUMBER"
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
 
       - name: Restore Cached Dependencies
         uses: actions/cache@v3
@@ -261,7 +262,7 @@ jobs:
 
       - name: Get Package Version
         run: |
-          export VERSION=$(node -p "require('./package.json').version")-${{ env.BRANCH_NAME }}.${{ github.run_id }}
+          export VERSION=$(node -p "require('./package.json').version")-pr-${{ env.PR_NUMBER }}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Update version package.json
@@ -313,8 +314,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
+            type=ref,event=pr
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -335,17 +335,17 @@ jobs:
       packages: write
 
     steps:
-      - name: Obter nome da branch
+      - name: Get number PR
         run: |
-          BRANCH_NAME=${GITHUB_REF#refs/heads/}
-          echo "Nome da branch: $BRANCH_NAME"
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN{FS="/"} {print $3}')
+          echo "Número do PR: $PR_NUMBER"
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
 
       - name: Scan vulnerability from Github Packages
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: image
-          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ env.BRANCH_NAME }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:pr-${{ env.PR_NUMBER }}
           format: 'sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'

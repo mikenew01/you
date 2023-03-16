@@ -243,11 +243,11 @@ jobs:
         with:
           node-version: ${{ env.ENV_NODE_VERSION }}
 
-      - name: Get number PR
+      - name: Get name branch
         run: |
-          PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN{FS="/"} {print $3}')
-          echo "Número do PR: $PR_NUMBER"
-          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          echo "Nome da branch: $BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Restore Cached Dependencies
         uses: actions/cache@v3
@@ -262,7 +262,7 @@ jobs:
 
       - name: Get Package Version
         run: |
-          export VERSION=$(node -p "require('./package.json').version")-${{ env.PR_NUMBER }}
+          export VERSION=$(node -p "require('./package.json').version")-${{ env.BRANCH_NAME }}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Update version package.json
@@ -314,7 +314,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=semver,pattern={{raw}}
+            type=semver,pattern={{version}} 
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
