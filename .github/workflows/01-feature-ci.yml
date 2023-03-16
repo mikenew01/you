@@ -233,7 +233,7 @@ jobs:
 
   codeql:
     timeout-minutes: 5
-    needs: [ unit-test, e2e, coverage, lint ]
+    needs: [ quality-test-unit, quality-test-integration, quality-test-coverage, quality-eslint ]
     runs-on: ubuntu-latest
 
     permissions:
