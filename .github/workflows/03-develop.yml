@@ -1,4 +1,4 @@
-name: develop-pull-request-ci
+name: ci-develop
 
 on:
   push:
