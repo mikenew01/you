@@ -16,6 +16,71 @@ env:
   ENV_NODE_ENV: 'production'
 
 jobs:
+  validate_git:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Validate secrets, passwords, URLs exposed in commits
+        run: |
+          git log --patch --no-merges -S 'password' -S 'secret' -S 'https://'
+          if [ $? -eq 0 ]; then
+            echo "Error: Secrets, passwords, or URLs exposed in commits."
+            exit 1
+          fi
+
+      - name: Validate secrets, passwords, URLs exposed in project files
+        run: |
+          git grep -E 'password|secret|https://'
+          if [ $? -eq 0 ]; then
+            echo "Error: Secrets, passwords, or URLs exposed in project files."
+            exit 1
+          fi
+
+      - name: Validate if commit follows the pattern in description "#<number> - description"
+        run: |
+          if ! git log -1 --pretty=%B | grep -qE '^#[0-9]+ - .+'; then
+            echo "Error: Commit description does not follow the pattern '#<number> - description'"
+            exit 1
+          fi
+
+    validate_project:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout source code
+          uses: actions/checkout@v2
+
+        - name: Validate package.json
+          run: |
+            PACKAGE_NAME=$(cat package.json | jq -r '.name')
+            PRIVATE=$(cat package.json | jq -r '.private')
+            PUBLISH_CONFIG=$(cat package.json | jq '.publishConfig')
+            REPOSITORY=$(cat package.json | jq '.repository')
+            VERSION=$(cat package.json | jq -r '.version')
+
+            if [[ ! ${PACKAGE_NAME} =~ ^@[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$ ]]; then
+              echo "Error: attribute name is not in the format @<company>/<name>"
+              exit 1
+            fi
+
+            if [[ ${PUBLISH_CONFIG} == "null" ]]; then
+              echo "Error: publishConfig is required"
+              exit 1
+            fi
+
+            if [[ ${REPOSITORY} == "null" ]]; then
+              echo "Error: repository is required"
+              exit 1
+            fi
+
+            if [[ ${PRIVATE} == "true" ]]; then
+              echo "Warning: private attribute is set to true, changing to false"
+              jq '.private = false' package.json > package.json.tmp && mv package.json.tmp package.json
+            fi
+
+            echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
   packages:
     timeout-minutes: 1
     runs-on: ubuntu-latest
@@ -183,7 +248,7 @@ jobs:
 
   codeql:
     timeout-minutes: 5
-    needs: [unit-test, e2e, coverage, lint]
+    needs: [ unit-test, e2e, coverage, lint ]
     runs-on: ubuntu-latest
 
     permissions:
