@@ -264,8 +264,14 @@ jobs:
           export VERSION=$(node -p "require('./package.json').version")-sha.${{github.sha}}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+      - name: Get name branch
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          echo "Nome da branch: $BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
       - name: Update version
-        run: npm version ${{ env.VERSION }}
+        run: npm version ${{ env.$BRANCH_NAME }}
 
       - name: Install Dependencies
         run: npm ci
@@ -312,7 +318,6 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=ref,event=branch
             type=ref,event=pr
 
       - name: Build and push Docker image
@@ -334,11 +339,17 @@ jobs:
       packages: write
 
     steps:
+      - name: Get name branch
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          echo "Nome da branch: $BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
       - name: Scan vulnerability from Github Packages
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: image
-          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:sha-${{ github.sha }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ env.BRANCH_NAME }}
           format: 'sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
