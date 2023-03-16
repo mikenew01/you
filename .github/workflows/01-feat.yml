@@ -98,8 +98,6 @@ jobs:
 
       - name: Commit and push the changes
         run: |
-          git add package.json
-          git commit -m "#0 - Github Actions - Bump version"
           git push
 
   packages:
