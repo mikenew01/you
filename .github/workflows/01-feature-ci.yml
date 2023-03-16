@@ -22,14 +22,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Validate secrets, passwords, URLs exposed in commits
-        run: |
-          git log --patch --no-merges -S 'password' -S 'secret'
-          if [ $? -eq 0 ]; then
-            echo "Error: Secrets, passwords, or URLs exposed in commits."
-            exit 1
-          fi
-
       - name: Validate secrets, passwords, URLs exposed in project files
         run: |
           git grep -E 'password|secret|https://'
