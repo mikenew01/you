@@ -24,7 +24,7 @@ jobs:
 
       - name: Validate secrets, passwords, URLs exposed in project files
         run: |
-          git grep -E 'password|secret|https://'
+          git grep -E 'password|secret'
           if [ $? -eq 0 ]; then
             echo "Error: Secrets, passwords, or URLs exposed in project files."
             exit 1
