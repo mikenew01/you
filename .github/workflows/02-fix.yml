@@ -3,7 +3,7 @@ name: ci-feature
 on:
   push:
     branches:
-      - 'feat/**'
+      - 'fix/**'
 
   workflow_dispatch:
 
