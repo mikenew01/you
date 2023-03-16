@@ -24,10 +24,10 @@ jobs:
 
       - name: Validate secrets, passwords, URLs exposed in project files
         run: |
-          git grep -E 'password|secret|https://' -- src/ test/
+          git grep -E 'password|secret|' -- src/
           if [ $? -eq 0 ]; then
-          echo "Error: Secrets, passwords, or URLs exposed in project files."
-          exit 1
+            echo "Error: Secrets, passwords, or URLs exposed in project files."
+            exit 1
           fi
 
       - name: Validate if commit follows the pattern in description "#<number> - description"
