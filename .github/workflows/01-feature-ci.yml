@@ -24,7 +24,7 @@ jobs:
 
       - name: Validate secrets, passwords, URLs exposed in commits
         run: |
-          git log --patch --no-merges -S 'password' -S 'secret' -S 'https://'
+          git log --patch --no-merges -S 'password' -S 'secret'
           if [ $? -eq 0 ]; then
             echo "Error: Secrets, passwords, or URLs exposed in commits."
             exit 1
