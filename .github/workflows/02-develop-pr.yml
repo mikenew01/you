@@ -339,7 +339,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: image
-          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:pr-${{ env.$PR_NUMBER }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:pr-${{ env.PR_NUMBER }}
           format: 'sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
