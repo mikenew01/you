@@ -266,7 +266,15 @@ jobs:
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Update version
-        run: npm version ${{ env.BRANCH_NAME }}
+        run: npm version 0.0.1-
+
+      - name: Update version package.json
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          NEW_VERSION= ${{ VERSION }}-${{ env.BRANCH_NAME }}
+          echo "Versão atual: $VERSION"
+          echo "Nova versão: $NEW_VERSION"
+          node -e "let pkg=require('./package.json'); pkg.version='${{NEW_VERSION}}'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2))"
 
       - name: Install Dependencies
         run: npm ci
