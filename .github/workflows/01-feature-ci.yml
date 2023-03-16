@@ -16,7 +16,7 @@ env:
   ENV_NODE_ENV: 'production'
 
 jobs:
-  validate_git:
+  validate-git:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -45,7 +45,7 @@ jobs:
             exit 1
           fi
 
-    validate_project:
+    validate-project:
       runs-on: ubuntu-latest
       steps:
         - name: Checkout source code
