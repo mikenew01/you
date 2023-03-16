@@ -314,7 +314,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=semver,pattern={{version}} 
+            type=ref,event=branch
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -335,17 +335,17 @@ jobs:
       packages: write
 
     steps:
-      - name: Get number PR
+      - name: Get name branch
         run: |
-          PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN{FS="/"} {print $3}')
-          echo "Número do PR: $PR_NUMBER"
-          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          echo "Nome da branch: $BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Scan vulnerability from Github Packages
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: image
-          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:pr-${{ env.PR_NUMBER }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ env.BRANCH_NAME }}
           format: 'sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
