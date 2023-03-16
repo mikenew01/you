@@ -1,24 +1,105 @@
-name: release-ci
+name: develop-pull-request-ci
 
 on:
   push:
-    branches:
-      - 'release/**'
+    branches: [ develop ]
 
 env:
   ENV_CHECKOUT_CACHE: 'npm'
-  ENV_NODE_VERSION: '18.x'
+  ENV_NODE_VERSION: '16.x'
   ENV_REGISTRY_URL: 'https://npm.pkg.github.com'
   ENV_NODE_ENV: 'production'
 
 jobs:
+
+  scan-config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Validate package.json
+        run: |
+          PACKAGE_NAME=$(cat package.json | jq -r '.name')
+          PRIVATE=$(cat package.json | jq -r '.private')
+          PUBLISH_CONFIG=$(cat package.json | jq '.publishConfig')
+          REPOSITORY=$(cat package.json | jq '.repository')
+
+          if [[ ! ${PACKAGE_NAME} =~ ^@[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$ ]]; then
+            echo "Error: attribute name is not in the format @<company>/<name>"
+            exit 1
+          fi
+
+          if [[ ${PUBLISH_CONFIG} == "null" ]]; then
+            echo "Error: publishConfig is required"
+            exit 1
+          fi
+
+          if [[ ${REPOSITORY} == "null" ]]; then
+            echo "Error: repository is required"
+            exit 1
+          fi
+
+          if [[ ${PRIVATE} == "true" ]]; then
+            echo "Warning: private attribute is set to true, changing to false"
+            jq '.private = false' package.json > package.json.tmp && mv package.json.tmp package.json
+          fi
+
+  change_version:
+    needs: [ scan-config ]
+    timeout-minutes: 1
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.ENV_NODE_VERSION }}
+
+      - name: Configure git
+        run: |
+          git config --global user.name "Github Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Get branch name
+        id: get_branch
+        run: echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
+
+      - name: Execute command if branch starts with 'fix/'
+        if: ${{ startsWith(steps.get_branch.outputs.branch_name, 'fix/') }}
+        run: |
+          npm version patch
+
+      - name: Execute command if branch starts with 'feat/'
+        if: ${{ startsWith(steps.get_branch.outputs.branch_name, 'feat/') }}
+        run: |
+          npm version minor
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
   packages:
+    needs: [ scan-config ]
     timeout-minutes: 1
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.ENV_NODE_VERSION }}
 
       - name: Install dependencies
         run: npm ci
@@ -57,6 +138,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.ENV_NODE_VERSION }}
+
       - name: Restore Cached Dependencies
         uses: actions/cache@v3
         id: npm-cache
@@ -82,6 +168,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.ENV_NODE_VERSION }}
 
       - name: Restore Cached Dependencies
         uses: actions/cache@v3
@@ -109,6 +200,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.ENV_NODE_VERSION }}
+
       - name: Restore Cached Dependencies
         uses: actions/cache@v3
         id: npm-cache
@@ -135,6 +231,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.ENV_NODE_VERSION }}
+
       - name: Restore Cached Dependencies
         uses: actions/cache@v3
         id: npm-cache
@@ -154,7 +255,7 @@ jobs:
 
   codeql:
     timeout-minutes: 5
-    needs: [unit-test, e2e, coverage, lint]
+    needs: [ unit-test, e2e, coverage, lint ]
     runs-on: ubuntu-latest
 
     permissions:
@@ -165,6 +266,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.ENV_NODE_VERSION }}
 
       - name: Restore Cached Dependencies
         uses: actions/cache@v3
@@ -199,6 +305,26 @@ jobs:
       packages: write
 
     steps:
+
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configurar Git
+        run: |
+          git config --global user.name "Github Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.ENV_NODE_VERSION }}
+
+      - name: Get name branch
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          echo "Nome da branch: $BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
       - name: Restore Cached Dependencies
         uses: actions/cache@v3
         id: npm-cache
@@ -210,18 +336,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
 
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
       - name: Get Package Version
         run: |
-          export VERSION=$(node -p "require('./package.json').version")-alpha.${{github.run_id}}
+          export VERSION=$(node -p "require('./package.json').version")-${{ env.BRANCH_NAME }}.${{ github.run_id }}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Change Version Package.json
-        uses: reedyuk/npm-version@1.1.1
-        with:
-          version: ${{ env.VERSION }}
+      - name: Update version package.json
+        run: |
+          npm version ${{ env.VERSION }}
 
       - name: Install Dependencies
         run: npm ci
@@ -268,7 +390,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=sha,format=long
+            type=ref,event=branch
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -289,11 +411,17 @@ jobs:
       packages: write
 
     steps:
+      - name: Get name branch
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          echo "Nome da branch: $BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
       - name: Scan vulnerability from Github Packages
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: image
-          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:sha-${{ github.sha }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ env.BRANCH_NAME }}
           format: 'sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
