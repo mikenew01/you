@@ -276,7 +276,7 @@ jobs:
   build-and-push-package:
     timeout-minutes: 1
     runs-on: ubuntu-latest
-    needs: [ unit-test, e2e, coverage ]
+    needs: [ quality-test-unit, quality-test-integration, quality-test-coverage ]
 
     permissions:
       contents: read
