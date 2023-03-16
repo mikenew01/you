@@ -243,6 +243,12 @@ jobs:
         with:
           node-version: ${{ env.ENV_NODE_VERSION }}
 
+      - name: Get number PR
+        run: |
+          PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN{FS="/"} {print $3}')
+          echo "Número do PR: $PR_NUMBER"
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+
       - name: Restore Cached Dependencies
         uses: actions/cache@v3
         id: npm-cache
