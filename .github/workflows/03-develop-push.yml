@@ -262,7 +262,7 @@ jobs:
 
       - name: Get Package Version
         run: |
-          export VERSION=$(node -p "require('./package.json').version")-pr-${{ env.PR_NUMBER }}
+          export VERSION=$(node -p "require('./package.json').version")-${{ env.PR_NUMBER }}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Update version package.json
