@@ -1,4 +1,4 @@
-name: ci-feature
+name: ci-feat
 
 on:
   push:
@@ -80,6 +80,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.ENV_NODE_VERSION }}
+
       - name: Configure git
         run: |
           git config --global user.name "Github Actions"
