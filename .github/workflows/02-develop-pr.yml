@@ -2,17 +2,12 @@ name: develop-pull-request-ci
 
 
 on:
-  push:
-    branches:
-      - 'feature/**'
-
   pull_request:
-    branches:
-      - 'feature/**'
+    branches: [develop]
 
 env:
   ENV_CHECKOUT_CACHE: 'npm'
-  ENV_NODE_VERSION: '18.x'
+  ENV_NODE_VERSION: '16.x'
   ENV_REGISTRY_URL: 'https://npm.pkg.github.com'
   ENV_NODE_ENV: 'production'
 
