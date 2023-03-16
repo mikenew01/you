@@ -1,9 +1,9 @@
-name: feature-ci
+name: release-ci
 
 on:
   push:
     branches:
-      - 'feature/**'
+      - 'release/**'
 
 env:
   ENV_CHECKOUT_CACHE: 'npm'
