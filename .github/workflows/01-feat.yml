@@ -79,6 +79,9 @@ jobs:
     timeout-minutes: 1
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -96,9 +99,15 @@ jobs:
       - name: Change version package.json for feat-prerelease
         run: npm version prerelease
 
-      - name: Commit and push the changes
-        run: |
-          git push
+#      - name: Commit and push the changes
+#        run: |
+#          git push
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
 
   packages:
     needs: [ change_version ]
