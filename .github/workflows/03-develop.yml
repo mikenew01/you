@@ -1,9 +1,8 @@
 name: develop-pull-request-ci
 
-
 on:
   push:
-    branches: [develop]
+    branches: [ develop ]
 
 env:
   ENV_CHECKOUT_CACHE: 'npm'
@@ -12,7 +11,84 @@ env:
   ENV_NODE_ENV: 'production'
 
 jobs:
+
+  scan-config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Validate package.json
+        run: |
+          PACKAGE_NAME=$(cat package.json | jq -r '.name')
+          PRIVATE=$(cat package.json | jq -r '.private')
+          PUBLISH_CONFIG=$(cat package.json | jq '.publishConfig')
+          REPOSITORY=$(cat package.json | jq '.repository')
+
+          if [[ ! ${PACKAGE_NAME} =~ ^@[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$ ]]; then
+            echo "Error: attribute name is not in the format @<company>/<name>"
+            exit 1
+          fi
+
+          if [[ ${PUBLISH_CONFIG} == "null" ]]; then
+            echo "Error: publishConfig is required"
+            exit 1
+          fi
+
+          if [[ ${REPOSITORY} == "null" ]]; then
+            echo "Error: repository is required"
+            exit 1
+          fi
+
+          if [[ ${PRIVATE} == "true" ]]; then
+            echo "Warning: private attribute is set to true, changing to false"
+            jq '.private = false' package.json > package.json.tmp && mv package.json.tmp package.json
+          fi
+
+  change_version:
+    needs: [ scan-config ]
+    timeout-minutes: 1
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.ENV_NODE_VERSION }}
+
+      - name: Configure git
+        run: |
+          git config --global user.name "Github Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Get branch name
+        id: get_branch
+        run: echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
+
+      - name: Execute command if branch starts with 'fix/'
+        if: ${{ startsWith(steps.get_branch.outputs.branch_name, 'fix/') }}
+        run: |
+          npm version patch
+
+      - name: Execute command if branch starts with 'feat/'
+        if: ${{ startsWith(steps.get_branch.outputs.branch_name, 'feat/') }}
+        run: |
+          npm version minor
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
   packages:
+    needs: [ scan-config ]
     timeout-minutes: 1
     runs-on: ubuntu-latest
 
