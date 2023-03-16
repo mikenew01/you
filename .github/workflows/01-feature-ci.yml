@@ -16,11 +16,11 @@ env:
   ENV_NODE_ENV: 'production'
 
 jobs:
-  validate-git:
+  scan-git:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Validate if commit follows the pattern in description "#<number> - description"
         run: |
@@ -29,11 +29,11 @@ jobs:
             exit 1
           fi
 
-  validate-project:
+  scan-config:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Validate package.json
         run: |
@@ -66,6 +66,7 @@ jobs:
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
   packages:
+    needs: [scan-git, scan-config]
     timeout-minutes: 1
     runs-on: ubuntu-latest
 
