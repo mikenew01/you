@@ -3,11 +3,9 @@ name: feature-ci
 on:
   push:
     branches:
-      - 'feature/**'
+      - 'feat/**'
 
-  pull_request:
-    branches:
-      - 'feature/**'
+  workflow_dispatch:
 
 env:
   ENV_CHECKOUT_CACHE: 'npm'
@@ -41,7 +39,6 @@ jobs:
           PRIVATE=$(cat package.json | jq -r '.private')
           PUBLISH_CONFIG=$(cat package.json | jq '.publishConfig')
           REPOSITORY=$(cat package.json | jq '.repository')
-          VERSION=$(cat package.json | jq -r '.version')
 
           if [[ ! ${PACKAGE_NAME} =~ ^@[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$ ]]; then
             echo "Error: attribute name is not in the format @<company>/<name>"
@@ -63,8 +60,6 @@ jobs:
             jq '.private = false' package.json > package.json.tmp && mv package.json.tmp package.json
           fi
 
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
   scan-packages:
     timeout-minutes: 5
     runs-on: ubuntu-latest
@@ -74,13 +69,33 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Audit Packages
-        run: npm audit --audit-level moderate
+      - name: Scan Packages
+        run: npm audit
         env:
           CI: true
 
-  packages:
+  change_version:
     needs: [ scan-git, scan-config, scan-packages ]
+    timeout-minutes: 1
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure git
+        run: |
+          git config --global user.name "Github Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Change version package.json for feat-prerelease
+        run: npm version prerelease
+
+      - name: Commit and push the changes
+        run: |
+          git add package.json
+          git commit -m "#0 - Github Actions - Bump version"
+          git push
+
+  packages:
+    needs: [ change_version ]
     timeout-minutes: 1
     runs-on: ubuntu-latest
 
