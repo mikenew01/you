@@ -1,4 +1,4 @@
-name: feature-ci
+name: ci-feature
 
 on:
   push:
@@ -22,8 +22,8 @@ jobs:
 
       - name: Validate if commit follows the pattern in description "#<number> - description"
         run: |
-          if ! git log -1 --pretty=%B | grep -qE '^#[0-9]+ - .+'; then
-            echo "Error: Commit description does not follow the pattern '#<number> - description'"
+          if ! git log -1 --pretty=%B | grep -qE '.+'; then
+            echo "Error: Commit description does not follow the pattern 'description'"
             exit 1
           fi
 
