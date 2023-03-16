@@ -266,7 +266,7 @@ jobs:
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Update version
-        run: npm version ${{ env.$BRANCH_NAME }}
+        run: npm version ${{ env.BRANCH_NAME }}
 
       - name: Install Dependencies
         run: npm ci
