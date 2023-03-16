@@ -231,7 +231,7 @@ jobs:
       - name: Coverage
         run: npm run test:cov
 
-  codeql:
+  sonar-codeql:
     timeout-minutes: 5
     needs: [ quality-test-unit, quality-test-integration, quality-test-coverage, quality-eslint ]
     runs-on: ubuntu-latest
@@ -283,7 +283,6 @@ jobs:
       packages: write
 
     steps:
-
       - name: Checkout Code
         uses: actions/checkout@v3
 
