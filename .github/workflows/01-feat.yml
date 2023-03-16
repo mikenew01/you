@@ -99,10 +99,6 @@ jobs:
       - name: Change version package.json for feat-prerelease
         run: npm version prerelease
 
-#      - name: Commit and push the changes
-#        run: |
-#          git push
-
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
